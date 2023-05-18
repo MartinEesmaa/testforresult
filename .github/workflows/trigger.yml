@@ -1,0 +1,17 @@
+name: Trigger external workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger external workflow
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.testforresult }}
+          repository: MartinEesmaa
+          event-type: fraunhoferhhi/vvenc
