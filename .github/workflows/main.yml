@@ -1,0 +1,44 @@
+name: My Workflow
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check latest commit
+      run: |
+        LATEST_COMMIT=$(curl -s https://api.github.com/repos/fraunhoferhhi/vvenc/commits | jq -r '.[0].sha')
+        if [[ "$LATEST_COMMIT" == "$GITHUB_SHA" ]]; then
+          echo "Latest commit detected"
+        else
+          echo "Other repository has a newer commit"
+          exit 1
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Build and test
+      run: |
+        git clone https://github.com/fraunhoferhhi/vvenc.git
+        cd vvenc
+        mkdir build
+        cd build
+        cmake ..
+        make
+        cd ..
+        cp bin/release-static/ /path/to/MartinEesmaa/testforresult/folder
+
+    - name: Upload artifacts
+      run: |
+        git config --global user.email "martin.eesmaa@protonmail.com"
+        git config --global user.name "Martin Eesmaa"
+        git add /path/to/MartinEesmaa/testforresult/folder/vvenc
+        git commit -m "Add compiled vvenc binary"
+        git push origin main
